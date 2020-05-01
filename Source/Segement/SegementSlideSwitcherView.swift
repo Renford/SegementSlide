@@ -13,6 +13,11 @@ public enum SwitcherType {
     case segement
 }
 
+public enum SwitcherAnimateType {
+    case normal
+    case progress
+}
+
 public protocol SegementSlideSwitcherViewDelegate: class {
     var titlesInSegementSlideSwitcherView: [String] { get }
     
@@ -148,9 +153,17 @@ public class SegementSlideSwitcherView: UIView {
     
     /// select one item by index
     public func selectSwitcher(at index: Int, animated: Bool) {
-        updateSelectedButton(at: index, animated: animated)
+//        updateSelectedButton(at: index, animated: animated)
+        selectSwitcherEvent(at: index, animated: animated)
+        if animated == false {
+            updateSwitcher(at: index)
+        }
     }
     
+    /// effect during slide
+    public func selectSwitcher(fromIndex: Int, toIndex: Int, progress: CGFloat) {
+        updateSwitcherBySlide(fromIndex: fromIndex, toIndex: toIndex, progress: progress)
+    }
 }
 
 extension SegementSlideSwitcherView {
@@ -158,12 +171,13 @@ extension SegementSlideSwitcherView {
     private func recoverInitSelectedIndex() {
         guard let initSelectedIndex = initSelectedIndex else { return }
         self.initSelectedIndex = nil
-        updateSelectedButton(at: initSelectedIndex, animated: false)
+        updateSwitcher(at: initSelectedIndex)
+//        updateSelectedButton(at: initSelectedIndex, animated: false)
     }
     
     private func updateSelectedIndex() {
-        guard let selectedIndex = selectedIndex else { return }
-        updateSelectedButton(at: selectedIndex, animated: false)
+//        guard let selectedIndex = selectedIndex else { return }
+//        updateSelectedButton(at: selectedIndex, animated: false)
     }
     
     private func layoutTitleButtons() {
@@ -200,7 +214,47 @@ extension SegementSlideSwitcherView {
         }
     }
     
-    private func updateSelectedButton(at index: Int, animated: Bool) {
+//    private func updateSelectedButton(at index: Int, animated: Bool) {
+//        guard scrollView.frame != .zero else {
+//            initSelectedIndex = index
+//            return
+//        }
+//        guard titleButtons.count != 0 else { return }
+//        if let selectedIndex = selectedIndex, selectedIndex >= 0, selectedIndex < titleButtons.count {
+//            let titleButton = titleButtons[selectedIndex]
+//            titleButton.setTitleColor(innerConfig.normalTitleColor, for: .normal)
+//            titleButton.titleLabel?.font = innerConfig.normalTitleFont
+//        }
+//        guard index >= 0, index < titleButtons.count else { return }
+//        let titleButton = titleButtons[index]
+//        titleButton.setTitleColor(innerConfig.selectedTitleColor, for: .normal)
+//        titleButton.titleLabel?.font = innerConfig.selectedTitleFont
+//        var indicatorWidth = self.innerConfig.indicatorWidth
+//        if indicatorWidth == 0 {
+//            let title = titleButton.title(for: .normal) ?? ""
+//            indicatorWidth = title.boundingWidth(with: self.innerConfig.normalTitleFont)
+//        }
+//        self.indicatorView.frame = CGRect(x: titleButton.frame.origin.x+(titleButton.bounds.width-indicatorWidth)/2, y: self.frame.height-self.innerConfig.indicatorHeight, width: indicatorWidth, height: self.innerConfig.indicatorHeight)
+        
+//        if case .segement = innerConfig.type {
+//            let titleButton = titleButtons[index]
+//            var offsetX = titleButton.frame.origin.x-(scrollView.bounds.width-titleButton.bounds.width)/2
+//            if offsetX < 0 {
+//                offsetX = 0
+//            } else if (offsetX+scrollView.bounds.width) > scrollView.contentSize.width {
+//                offsetX = scrollView.contentSize.width-scrollView.bounds.width
+//            }
+//            if scrollView.contentSize.width > scrollView.bounds.width {
+//                scrollView.setContentOffset(CGPoint(x: offsetX, y: scrollView.contentOffset.y), animated: animated)
+//            }
+//        }
+        
+//        guard index != selectedIndex else { return }
+//        selectedIndex = index
+//        delegate?.segementSwitcherView(self, didSelectAtIndex: index, animated: animated)
+//    }
+    
+    private func updateSwitcher(at index: Int) {
         guard scrollView.frame != .zero else {
             initSelectedIndex = index
             return
@@ -215,19 +269,78 @@ extension SegementSlideSwitcherView {
         let titleButton = titleButtons[index]
         titleButton.setTitleColor(innerConfig.selectedTitleColor, for: .normal)
         titleButton.titleLabel?.font = innerConfig.selectedTitleFont
-        if animated, indicatorView.frame != .zero {
-            UIView.animate(withDuration: 0.25) {
-                var indicatorWidth = self.innerConfig.indicatorWidth
-                if indicatorWidth == 0 {
-                    let title = titleButton.title(for: .normal) ?? ""
-                    indicatorWidth = title.boundingWidth(with: self.innerConfig.normalTitleFont) * 0.8
+        
+        var indicatorWidth = self.innerConfig.indicatorWidth
+        if indicatorWidth == 0 {
+            let title = titleButton.title(for: .normal) ?? ""
+            indicatorWidth = title.boundingWidth(with: self.innerConfig.normalTitleFont)
+        }
+        self.indicatorView.frame = CGRect(x: titleButton.frame.origin.x+(titleButton.bounds.width-indicatorWidth)/2, y: self.frame.height-self.innerConfig.indicatorHeight, width: indicatorWidth, height: self.innerConfig.indicatorHeight)
+    }
+    
+    private func updateSwitcherBySlide(fromIndex: Int, toIndex: Int, progress: CGFloat) {
+        guard scrollView.frame != .zero, titleButtons.count != 0 else {
+            return
+        }
+        
+        let indicatorY = self.frame.height - self.innerConfig.indicatorHeight
+        let indicatorHeight = self.innerConfig.indicatorHeight
+        
+        var fromWidth = self.innerConfig.indicatorWidth
+        var toWidth = self.innerConfig.indicatorWidth
+        if fromWidth == 0 {
+            let fromTitle = titleButtons[fromIndex].title(for: .normal) ?? ""
+            let toTitle = titleButtons[toIndex].title(for: .normal) ?? ""
+            fromWidth = fromTitle.boundingWidth(with: self.innerConfig.normalTitleFont)
+            toWidth = toTitle.boundingWidth(with: self.innerConfig.normalTitleFont)
+        }
+        
+        let fromX = titleButtons[fromIndex].frame.midX - fromWidth/2
+        let toX = titleButtons[toIndex].frame.midX - toWidth/2
+        
+        var frame = CGRect.zero
+        if config.animateType == .progress {
+            if fromIndex < toIndex {
+                if progress < 0.5 {
+                    let tX = fromX
+                    let tWidth = fromWidth + (toX + toWidth - fromX - fromWidth) * 2 * progress
+                    frame = CGRect(x: tX, y: indicatorY, width: tWidth, height: indicatorHeight)
+                } else {
+                    let tWidth = toWidth + (toX - fromX) * (1 - progress) * 2
+                    let tX = toX + toWidth - tWidth
+                    frame = CGRect(x: tX, y: indicatorY, width: tWidth, height: indicatorHeight)
                 }
-                self.indicatorView.frame = CGRect(x: titleButton.frame.origin.x+(titleButton.bounds.width-indicatorWidth)/2, y: self.frame.height-self.innerConfig.indicatorHeight, width: indicatorWidth, height: self.innerConfig.indicatorHeight)
+            } else {
+                if progress < 0.5 {
+                    let tX = fromX - (fromX - toX) * progress * 2
+                    let tWidth = fromX - tX + fromWidth
+                    frame = CGRect(x: tX, y: indicatorY, width: tWidth, height: indicatorHeight)
+                } else {
+                    let tX = toX
+                    let tWidth = (fromX + fromWidth - toX - toWidth) * (progress - 0.5) * 2 + toWidth
+                    frame = CGRect(x: tX, y: indicatorY, width: tWidth, height: indicatorHeight)
+                }
             }
         } else {
-            indicatorView.frame = CGRect(x: titleButton.frame.origin.x+(titleButton.bounds.width-innerConfig.indicatorWidth)/2, y: frame.height-innerConfig.indicatorHeight, width: innerConfig.indicatorWidth, height: innerConfig.indicatorHeight)
+            let tFromX = fromX + (toX - fromX) * progress
+            let tWidth = fromWidth + (toWidth - fromWidth) * progress
+            frame = CGRect(x: tFromX, y: indicatorY, width: tWidth, height:indicatorHeight)
         }
+        
+        self.indicatorView.frame = frame
+    }
+    
+    private func selectSwitcherEvent(at index: Int, animated: Bool) {
+        updateContentOffset(at: index, animated: animated)
+        
+        guard index != selectedIndex else { return }
+        selectedIndex = index
+        delegate?.segementSwitcherView(self, didSelectAtIndex: index, animated: animated)
+    }
+    
+    private func updateContentOffset(at index: Int, animated: Bool) {
         if case .segement = innerConfig.type {
+            let titleButton = titleButtons[index]
             var offsetX = titleButton.frame.origin.x-(scrollView.bounds.width-titleButton.bounds.width)/2
             if offsetX < 0 {
                 offsetX = 0
@@ -238,13 +351,22 @@ extension SegementSlideSwitcherView {
                 scrollView.setContentOffset(CGPoint(x: offsetX, y: scrollView.contentOffset.y), animated: animated)
             }
         }
-        guard index != selectedIndex else { return }
-        selectedIndex = index
-        delegate?.segementSwitcherView(self, didSelectAtIndex: index, animated: animated)
     }
     
     @objc private func didClickTitleButton(_ button: UIButton) {
-        selectSwitcher(at: button.tag, animated: true)
+//        selectSwitcher(at: button.tag, animated: true)
+        selectSwitcherEvent(at: button.tag, animated: true)
     }
     
+}
+
+extension UIColor {
+    
+    /// 生成线性过度色
+    /// - Parameters:
+    ///   - toCcolor: 目标颜色
+    ///   - coe: 系数
+    func generateColor(toCcolor: UIColor, coe: CGFloat) -> UIColor {
+        return UIColor.red.withAlphaComponent(coe)
+    }
 }

@@ -19,6 +19,8 @@ public protocol SegementSlideContentDelegate: class {
     
     func segementSlideContentScrollView(at index: Int) -> SegementSlideContentScrollViewDelegate?
     func segementSlideContentView(_ segementSlideContentView: SegementSlideContentView, didSelectAtIndex index: Int, animated: Bool)
+    
+    func segementSlideContentView(_ segementSlideContentView: SegementSlideContentView, fromIndex: Int, toIndex: Int, progress: CGFloat)
 }
 
 public class SegementSlideContentView: UIView {
@@ -42,6 +44,8 @@ public class SegementSlideContentView: UIView {
             scrollView.isScrollEnabled = newValue
         }
     }
+    
+    fileprivate var preOffsetX: CGFloat = 0.0
     
     public override init(frame: CGRect) {
         super.init(frame: frame)
@@ -120,7 +124,42 @@ extension SegementSlideContentView: UIScrollViewDelegate {
         let index = Int(indexFloat)
         updateSelectedViewController(at: index, animated: true)
     }
-
+    
+    public func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        scrollViewDidScrollByProgress(scrollView)
+    }
+    
+    private func scrollViewDidScrollByProgress(_ scrollView: UIScrollView) {
+        let offsetX = scrollView.contentOffset.x
+        let width = scrollView.bounds.width
+        let floorIndex = Int(floor(offsetX / width))
+        var progress = offsetX / width - CGFloat(floorIndex)
+        
+        guard let totalCount = delegate?.segementSlideContentScrollViewCount,
+            floorIndex >= 0 else {
+            return
+        }
+        
+        var fromIndex = 0
+        var toIndex = 0
+        
+        if offsetX >= preOffsetX {
+            if floorIndex >= totalCount - 1 {
+                return
+            }
+            fromIndex = floorIndex
+            toIndex = floorIndex + 1
+        } else {
+            if floorIndex < 0 {
+                return
+            }
+            fromIndex = floorIndex + 1
+            toIndex = floorIndex
+            progress = 1 - progress
+        }
+        
+        delegate?.segementSlideContentView(self, fromIndex: fromIndex, toIndex: toIndex, progress: progress)
+    }
 }
 
 extension SegementSlideContentView {
@@ -221,6 +260,10 @@ extension SegementSlideContentView {
         guard index != selectedIndex else { return }
         selectedIndex = index
         delegate?.segementSlideContentView(self, didSelectAtIndex: index, animated: animated)
+    }
+    
+    private func updateSelectedController(at index: Int, pogress: Float) {
+        
     }
     
 }

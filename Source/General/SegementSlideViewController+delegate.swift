@@ -70,4 +70,7 @@ extension SegementSlideViewController: SegementSlideContentDelegate {
         childKeyValueObservation = keyValueObservation
     }
     
+    public func segementSlideContentView(_ segementSlideContentView: SegementSlideContentView, fromIndex: Int, toIndex: Int, progress: CGFloat) {
+        segementSlideSwitcherView.selectSwitcher(fromIndex: fromIndex, toIndex: toIndex, progress: progress)
+    }
 }

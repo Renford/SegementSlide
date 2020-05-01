@@ -167,4 +167,8 @@ extension NoticeViewController: SegementSlideContentDelegate {
         }
     }
     
+    func segementSlideContentView(_ segementSlideContentView: SegementSlideContentView, fromIndex: Int, toIndex: Int, progress: CGFloat) {
+        
+    }
+    
 }
