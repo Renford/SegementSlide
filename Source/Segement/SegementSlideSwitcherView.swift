@@ -283,6 +283,15 @@ extension SegementSlideSwitcherView {
             return
         }
         
+        let fromColor = config.selectedTitleColor.getColor(to: config.normalTitleColor, coe: progress)
+        let toColor = config.normalTitleColor.getColor(to: config.selectedTitleColor, coe: progress)
+        let fromFont = config.selectedTitleFont.getFont(to: config.normalTitleFont, coe: progress)
+        let toFont = config.normalTitleFont.getFont(to: config.selectedTitleFont, coe: progress)
+        titleButtons[fromIndex].setTitleColor(fromColor, for: .normal)
+        titleButtons[toIndex].setTitleColor(toColor, for: .normal)
+        titleButtons[fromIndex].titleLabel?.font = fromFont
+        titleButtons[toIndex].titleLabel?.font = toFont
+        
         let indicatorY = self.frame.height - self.innerConfig.indicatorHeight
         let indicatorHeight = self.innerConfig.indicatorHeight
         
@@ -358,15 +367,4 @@ extension SegementSlideSwitcherView {
         selectSwitcherEvent(at: button.tag, animated: true)
     }
     
-}
-
-extension UIColor {
-    
-    /// 生成线性过度色
-    /// - Parameters:
-    ///   - toCcolor: 目标颜色
-    ///   - coe: 系数
-    func generateColor(toCcolor: UIColor, coe: CGFloat) -> UIColor {
-        return UIColor.red.withAlphaComponent(coe)
-    }
 }
