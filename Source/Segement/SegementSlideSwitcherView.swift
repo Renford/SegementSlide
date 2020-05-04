@@ -162,7 +162,7 @@ public class SegementSlideSwitcherView: UIView {
     public func selectSwitcher(fromIndex: Int, toIndex: Int, progress: CGFloat) {
         updateSwitcherBySlide(fromIndex: fromIndex, toIndex: toIndex, progress: progress)
         
-        if selectedIndex == fromIndex || selectedIndex == toIndex {
+        if progress == 0.0 || progress == 1.0 {
             titleButtons.enumerated().forEach { (index, button) in
                 if index != selectedIndex {
                     button.titleLabel?.font = config.normalTitleFont
