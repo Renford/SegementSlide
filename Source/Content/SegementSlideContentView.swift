@@ -144,18 +144,22 @@ extension SegementSlideContentView: UIScrollViewDelegate {
         var toIndex = 0
         
         if offsetX >= preOffsetX {
-            if floorIndex >= totalCount - 1 {
-                return
-            }
             fromIndex = floorIndex
             toIndex = floorIndex + 1
-        } else {
-            if floorIndex < 0 {
-                return
+            if floorIndex >= totalCount - 1 {
+                fromIndex = floorIndex
+                toIndex = floorIndex
+                progress = 1
             }
+        } else {
             fromIndex = floorIndex + 1
             toIndex = floorIndex
             progress = 1 - progress
+            if floorIndex < 0 {
+                fromIndex = floorIndex
+                toIndex = floorIndex
+                progress = 0
+            }
         }
         
         delegate?.segementSlideContentView(self, fromIndex: fromIndex, toIndex: toIndex, progress: progress)

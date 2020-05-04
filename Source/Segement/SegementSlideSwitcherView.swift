@@ -154,15 +154,22 @@ public class SegementSlideSwitcherView: UIView {
     /// select one item by index
     public func selectSwitcher(at index: Int, animated: Bool) {
 //        updateSelectedButton(at: index, animated: animated)
+        updateSwitcher(at: index)
         selectSwitcherEvent(at: index, animated: animated)
-        if animated == false {
-            updateSwitcher(at: index)
-        }
     }
     
     /// effect during slide
     public func selectSwitcher(fromIndex: Int, toIndex: Int, progress: CGFloat) {
         updateSwitcherBySlide(fromIndex: fromIndex, toIndex: toIndex, progress: progress)
+        
+        if selectedIndex == fromIndex || selectedIndex == toIndex {
+            titleButtons.enumerated().forEach { (index, button) in
+                if index != selectedIndex {
+                    button.titleLabel?.font = config.normalTitleFont
+                    button.setTitleColor(config.normalTitleColor, for: .normal)
+                }
+            }
+        }
     }
 }
 
@@ -172,11 +179,14 @@ extension SegementSlideSwitcherView {
         guard let initSelectedIndex = initSelectedIndex else { return }
         self.initSelectedIndex = nil
         updateSwitcher(at: initSelectedIndex)
+        updateContentOffset(at: initSelectedIndex, animated: false)
 //        updateSelectedButton(at: initSelectedIndex, animated: false)
     }
     
     private func updateSelectedIndex() {
-//        guard let selectedIndex = selectedIndex else { return }
+        guard let selectedIndex = selectedIndex else { return }
+        updateSwitcher(at: selectedIndex)
+        updateContentOffset(at: selectedIndex, animated: false)
 //        updateSelectedButton(at: selectedIndex, animated: false)
     }
     
