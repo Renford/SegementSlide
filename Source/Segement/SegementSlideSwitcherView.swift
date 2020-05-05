@@ -196,12 +196,12 @@ extension SegementSlideSwitcherView {
             scrollView.contentSize = CGSize(width: bounds.width, height: bounds.height)
             return
         }
-        var offsetX = innerConfig.horizontalMargin
+        var offsetX = innerConfig.switcherMargin.left
         for titleButton in titleButtons {
             let buttonWidth: CGFloat
             switch innerConfig.type {
             case .tab:
-                buttonWidth = (bounds.width-innerConfig.horizontalMargin*2)/CGFloat(titleButtons.count)
+                buttonWidth = (bounds.width-innerConfig.switcherMargin.left-innerConfig.switcherMargin.right)/CGFloat(titleButtons.count)
             case .segement:
                 let title = titleButton.title(for: .normal) ?? ""
                 let normalButtonWidth = title.boundingWidth(with: innerConfig.normalTitleFont)
@@ -220,7 +220,7 @@ extension SegementSlideSwitcherView {
         case .tab:
             scrollView.contentSize = CGSize(width: bounds.width, height: bounds.height)
         case .segement:
-            scrollView.contentSize = CGSize(width: offsetX-innerConfig.horizontalSpace+innerConfig.horizontalMargin, height: bounds.height)
+            scrollView.contentSize = CGSize(width: offsetX-innerConfig.horizontalSpace+innerConfig.switcherMargin.right, height: bounds.height)
         }
     }
     

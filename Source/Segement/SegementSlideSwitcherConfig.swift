@@ -14,7 +14,8 @@ public struct SegementSlideSwitcherConfig {
     
     public var type: SwitcherType
     public var animateType: SwitcherAnimateType
-    public var horizontalMargin: CGFloat
+//    public var horizontalMargin: CGFloat
+    public var switcherMargin: UIEdgeInsets
     public var horizontalSpace: CGFloat
     public var normalTitleFont: UIFont
     public var selectedTitleFont: UIFont
@@ -30,7 +31,8 @@ public struct SegementSlideSwitcherConfig {
     
     public init(type: SwitcherType = .segement,
                 animateType: SwitcherAnimateType = .normal,
-                horizontalMargin: CGFloat = 16,
+//                horizontalMargin: CGFloat = 16,
+                switcherMargin: UIEdgeInsets = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16),
                 horizontalSpace: CGFloat = 32,
                 normalTitleFont: UIFont = UIFont.systemFont(ofSize: 15),
                 selectedTitleFont: UIFont = UIFont.systemFont(ofSize: 15, weight: .medium),
@@ -45,7 +47,8 @@ public struct SegementSlideSwitcherConfig {
                 badgeFontForCountType: UIFont = UIFont.systemFont(ofSize: 10, weight: .regular)) {
         self.type = type
         self.animateType = animateType
-        self.horizontalMargin = horizontalMargin
+//        self.horizontalMargin = horizontalMargin
+        self.switcherMargin = switcherMargin
         self.horizontalSpace = horizontalSpace
         self.normalTitleFont = normalTitleFont
         self.selectedTitleFont = selectedTitleFont
